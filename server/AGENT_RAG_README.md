@@ -1,0 +1,484 @@
+# Agent + RAG Layer
+
+The Agentic AI half of the Smart Event Management System: the LangGraph agent,
+its tools, and the hybrid-search RAG pipeline behind the policy knowledge base.
+
+Built against the Infosys *Agentic AI Smart Event Management System* roadmap
+(sections 10 to 16 and weeks 3 to 6), with the retrieval architecture adapted
+from the hybrid-search design in the team's pipeline diagram.
+
+---
+## 1. What this layer does
+
+```
+User message
+    │
+    ▼
+POST /api/chat ──► LangGraph agent ──► tool selection
+                         │
+            ┌────────────┴────────────┐
+            ▼                         ▼
+     Business tools               RAG tool
+   (via service layer)      (hybrid search over
+            │                 policy documents)
+            ▼                         ▼
+       PostgreSQL              pgvector + tsvector
+            └────────────┬────────────┘
+                         ▼
+                   Agent observes
+                         │
+              another tool? ──yes──┐
+                         │         │
+                         no        └─► loop (capped)
+                         ▼
+                  Final response
+```
+
+Everything is logged to `agent_runs` and `tool_calls` for the
+`/admin/agent-activity` view.
+
+---
+
+## 2. Setup
+
+### Prerequisites
+
+- PostgreSQL with the **pgvector** extension available
+- Python 3.11+
+- A Groq API key for agent chat — <https://console.groq.com/keys>
+- An OpenRouter API key for RAG embeddings — <https://openrouter.ai/keys>
+
+Check pgvector is installable before anything else. If this fails, nothing
+below will work:
+
+```bash
+psql -d eventdb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+On Debian/Ubuntu: `sudo apt install postgresql-16-pgvector`.
+On macOS/Homebrew: `brew install pgvector`.
+Docker: use the `pgvector/pgvector:pg16` image instead of plain `postgres`.
+
+### Install
+
+```bash
+cd backend
+uv sync
+cp .env.example .env    # then replace the DATABASE_URL with your shared cloud DB
+```
+
+For a group project, do not use localhost as the database host. Use one shared PostgreSQL database in Neon, Supabase, Render, or Railway. Everyone on the team should point their local `.env` file to the same `DATABASE_URL` so you all work on the same data set.
+
+### Migrate
+
+```bash
+uv run alembic upgrade head
+```
+
+Migration `a1b2c3d4e5f6` creates the vector extension, the knowledge
+tables (with HNSW and GIN indexes) and the agent tables. Migration
+`e6f7a8b9c0d1` adds `knowledge_chunks_nvidia` with 2048-dimensional
+OpenRouter embeddings. Hugging Face / legacy embeddings are no longer used;
+`RAG_ACTIVE_EMBEDDING_INDEX` must be `nvidia`.
+
+### Index the policy documents (OpenRouter)
+
+Embeddings use OpenRouter model `nvidia/llama-nemotron-embed-vl-1b-v2:free`
+(2048 dims). Vectors are L2-normalized before storage. HNSW indexes use
+pgvector `halfvec(2048)` (pgvector 0.7.0+).
+
+```bash
+uv run python scripts/ingest_knowledge.py
+```
+
+Expect roughly 38 chunks across the six documents in `documents/`. Re-running
+is safe — unchanged files are skipped by content hash.
+
+```bash
+uv run python scripts/ingest_knowledge.py --force   # after changing model or chunk size
+uv run python scripts/ingest_knowledge.py --clear   # wipe the OpenRouter index first
+```
+
+Check `/api/admin/knowledge/status` (or Admin → Knowledge Base) to confirm
+chunks are populated and the index is ready.
+
+### Run
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+To run the installed console entry point without auto-reload:
+
+```bash
+uv run backend
+```
+
+Verify the index is populated:
+
+```bash
+curl -H "Authorization: Bearer <admin-jwt>" \
+  http://localhost:8000/api/admin/knowledge/status
+```
+
+---
+
+## 3. Endpoints
+
+| Method | Path | Access | Purpose |
+|---|---|---|---|
+| POST | `/api/chat` | any user | Talk to the agent |
+| GET | `/api/chat/sessions` | any user | The caller's conversation threads |
+| GET | `/api/chat/sessions/{id}` | owner only | Messages in one thread |
+| GET | `/api/admin/agent-activity` | admin | Recent agent runs |
+| GET | `/api/admin/agent-activity/{run_id}` | admin | One run with its tool calls |
+| POST | `/api/admin/knowledge/ingest` | admin | Reindex the documents |
+| GET | `/api/admin/knowledge/status` | admin | What is currently indexed |
+
+### Request / response
+
+```jsonc
+// POST /api/chat
+{ "message": "find an AI workshop and register me", "session_id": null }
+
+// 200
+{
+  "reply": "I found the AI Foundations workshop on Saturday and registered you...",
+  "session_id": "…", "run_id": "…",
+  "intent": "MULTI_STEP",
+  "tools_used": ["search_events", "register_participant"],
+  "sources": [],
+  "latency_ms": 3120.5,
+  "status": "success"
+}
+```
+
+Pass `session_id` back on the next message to continue the conversation.
+Omit it to start a fresh thread.
+
+### Frontend wiring
+
+`frontend/src/admin/services/aiService.js` is still returning its mock. Switch
+`sendAIMessage` to the real call:
+
+```js
+export async function sendAIMessage(message, conversationId = null) {
+  return apiPost("/chat", { message, session_id: conversationId });
+}
+```
+
+The response field is `session_id`, not `conversation_id` — the mock used the
+latter, so that one rename is needed on the calling side.
+
+---
+
+## 4. The tools
+
+Nine from section 10 of the roadmap, plus three helpers.
+
+| Tool | Access | Wraps |
+|---|---|---|
+| `search_events` | guest, user, admin | `event_service` |
+| `get_event_details` | guest, user, admin | `event_service` |
+| `search_venues` * | guest, user, admin | `venue_service` |
+| `check_venue_availability` | guest, user, admin | `availability_service` |
+| `search_event_policy` | guest, user, admin | RAG pipeline |
+| `register_participant` | user only | `registration_service` |
+| `cancel_registration` | user only (own registrations) | `registration_service` |
+| `my_registrations` * | user only | `registration_service` |
+| `create_event` | **admin** | `event_service` |
+| `update_event` | **admin** | `event_service` |
+| `cancel_event` | **admin** | `event_service` |
+| `delete_event` | **admin** | `event_service` |
+| `get_event_registrations` * | **admin** | `registration_service` |
+| `list_all_registrations` | **admin** | `registration_service` |
+| `create_venue`, `update_venue`, `delete_venue` | **admin** | `venue_service` |
+| `list_users`, `create_user`, `delete_user` | **admin** | `user_service` |
+| `update_user_role` | **MAIN_ADMIN** | `user_service` |
+| `view_agent_activity`, `view_agent_run` | **admin** | agent observability |
+
+\* Not in the roadmap's list. `search_venues` exists because
+`check_venue_availability` needs a `venue_id` and users say "the Main
+Auditorium" — without a lookup the model's only way to produce that id is to
+invent one. `my_registrations` and `get_event_registrations` provide
+participant-specific and admin-wide registration views, respectively.
+
+**No tool touches SQL.** Every one calls a service, per section 10.
+
+### Identity and permissions
+
+Tools take business arguments only. The authenticated user ID comes from the
+JWT subject, and the backend reloads the user's current role from the database.
+`user_id`, that database-derived role, and the database session travel through
+a `contextvars`-based `ToolContext`; role claims or role values in prompts are
+not trusted.
+
+This is deliberate. LangChain turns a tool signature into the JSON schema the
+model sees, so a visible `user_id` parameter would let a user say *"register
+bob@example.com for me"* and have the model comply. A test asserts no tool
+exposes it.
+
+Tools are filtered by role before binding. Administrative tools also call
+`require_admin()` internally, and their service operations recheck authorization
+and ownership. The prompt also describes these restrictions, but prompt
+instructions are a suggestion and the Python checks are the guarantee.
+Admins never receive participant-registration tools; they cannot register for
+or cancel registrations as participants. Only `MAIN_ADMIN` may change user
+roles or create/delete privileged accounts.
+
+---
+
+## 5. RAG pipeline
+
+### Indexing
+
+```
+documents/*.md
+   │ MarkItDown (pdf, docx, pptx, xlsx, html, csv)
+   ▼ Markdown
+   │ heading-aware chunker
+   ▼ chunks (~1400 chars)
+   │ LLM metadata extractor (summary + synonym keywords)
+   ▼
+   ├─► dense embedding ──► knowledge_chunks.embedding  (vector 384, HNSW)
+   └─► to_tsvector      ──► knowledge_chunks.search_vec (tsvector, GIN)
+```
+
+### Query
+
+```
+question
+   ├─► dense_search  (cosine, top 20)  ─┐
+   └─► sparse_search (ts_rank_cd, 20)  ─┴─► RRF fusion (top 10)
+                                              │
+                                         reranker (top 4)
+                                              │
+                                        prompt builder
+                                              │
+                                             LLM
+                                              │
+                                     hallucination checker
+                                         │         │
+                                    grounded   ungrounded ──► retry once
+                                         │                       │
+                                         ▼                       ▼
+                                   final answer            refuse to answer
+```
+
+### Where this departs from the diagram
+
+| Diagram | Here | Why |
+|---|---|---|
+| Qdrant | PostgreSQL + pgvector | The roadmap mandates pgvector. One database instead of two services. |
+| BM25 via FastEmbed | Postgres FTS (`tsvector` + `ts_rank_cd`) | pgvector has no sparse-vector support. `ts_rank_cd` lacks BM25's document-length normalisation, but over short uniform policy chunks that barely matters, and it brings stemming and stopwords for free. |
+| `nomic-embed-text` | `liquid/lfm-2.5-embedding-350m` | What the team's `.env` specifies. |
+| Ollama / Gemma | OpenRouter | Same. |
+| — | Reranking stage | Requested; retrieval is tuned for recall, so precision has to come from somewhere. |
+| — | Conversation memory | Requested; also needed for the roadmap's `agent_sessions`. |
+
+Everything else — unified conversion, smart chunking, LLM metadata, dual
+embedding, RRF fusion, hallucination check with retry — follows the diagram.
+
+### Why RRF rather than combining scores
+
+Cosine similarity lives roughly in `[0, 1]`; `ts_rank_cd` is unbounded and
+differently distributed. You cannot add them, and normalising into a shared
+range needs assumptions that break as soon as the corpus changes. RRF discards
+the scores and uses only rank:
+
+```
+score(chunk) = Σ  1 / (K + rank_in_that_list)
+```
+
+A chunk ranked first by one arm and missing from the other still scores well,
+which is the point — the arms are *supposed* to disagree.
+
+---
+
+## 6. Configuration
+
+All in `app/core/ai_config.py`, overridable from `.env`.
+
+### The three settings that matter most
+
+The OpenRouter index uses **`OPENROUTER_EMBEDDING_DIM=2048`**, matching its
+`vector(2048)` columns. A dimension change requires a new staging index/migration
+and re-ingestion; both paths reject vectors with unexpected dimensions.
+
+**`CHUNK_SIZE_CHARS=1400`** is set by the embedding model's **512-token**
+limit, not by taste. Longer chunks are silently truncated by the model — you
+get a vector that does not represent its own text and **no error anywhere**. A
+test asserts `CHUNK_SIZE + OVERLAP` stays under that ceiling.
+
+Agent chat tries Groq first when `GROQ_API_KEY` is configured, using the
+environment-provided `GROQ_MODEL`. If Groq fails with a retryable provider
+error (including rate limiting), the router tries OpenRouter when configured.
+OpenRouter also remains the embeddings provider, so keep `OPENROUTER_API_KEY`,
+`OPENROUTER_MODEL`, and `OPENROUTER_EMBEDDING_MODEL` configured for fallback
+chat and RAG.
+
+### Retrieval tuning
+
+| Setting | Default | Effect |
+|---|---|---|
+| `DENSE_TOP_K` / `SPARSE_TOP_K` | 20 | Candidates per arm. Raise for recall, cost is rerank latency. |
+| `RRF_K` | 60 | Lower sharpens the top rank; higher flattens. |
+| `FUSED_TOP_K` | 10 | Candidates reaching the reranker. |
+| `FINAL_TOP_K` | 4 | Chunks reaching the prompt. Raising this often *hurts* — irrelevant context is a common cause of confident wrong answers. |
+| `AGENT_MAX_TOOL_LOOPS` | 6 | Hard stop on the reason/act cycle. |
+| `MEMORY_WINDOW_MESSAGES` | 10 | Prior turns loaded into context. |
+
+Feature flags: `ENABLE_RERANKER`, `ENABLE_METADATA_EXTRACTION`,
+`ENABLE_HALLUCINATION_CHECK`. Turn them off to isolate a problem — if answers
+improve with the reranker off, the reranker is the issue.
+
+`ENABLE_RERANKER` defaults to `false` to avoid an extra LLM request on each
+policy search. Set it to `true` in `backend/.env` when reranking quality is
+more important than response time.
+
+### Chat latency diagnostics
+
+The chat request emits one-line JSON timing records through the
+`app.chat_timing` logger. Filter by `event=chat_timing` and correlate records
+with `run_id` when present. Timings cover authentication, agent/session/run
+database stages, conversation history and prompt profiling, LangGraph nodes,
+each model attempt and router invocation, tools, response persistence, and
+individual RAG retrieval/generation stages. SQL records include a hashed
+statement ID and a redacted statement shape; SQL parameters are not logged.
+
+`estimated_input_tokens` is a rough character-count estimate, not the model's
+tokenizer count. Prompt text, tool arguments, and API credentials are not
+included in these timing records. The `/api/chat` response also includes a
+`Server-Timing` header, while the browser logs the total request duration and
+backend agent duration under `[chat-timing]`. The current stream endpoint runs
+the agent before yielding its first event, so it does not provide model-token
+time-to-first-token measurements.
+
+Stage timings are application logs, not fields shown in Admin Agent Activity;
+that screen currently exposes total run and per-tool latency. To investigate a
+slow production request, restart the instrumented backend, send a representative
+request, and compare all timing records for its run ID. A local mocked test
+duration does not measure OpenRouter, production database, or browser latency.
+
+---
+
+## 7. Tests
+
+```bash
+pytest tests/ai -q                          # AI/timing unit tests; no database or API key needed
+pytest tests/test_user_event_journey.py -q  # PostgreSQL-backed user workflow
+```
+
+The parent `tests/conftest.py` has an autouse fixture that creates tables
+against a real Postgres. `tests/ai/conftest.py` shadows it, so chunking and
+fusion arithmetic do not depend on a running database. The API tests are
+unaffected. The journey tests cover login, event search, confirmed
+registration, policy retrieval, and venue interval conflicts; they skip when
+PostgreSQL is not reachable on localhost:5432. Run the browser workflow with
+`cd frontend && npm run test:e2e` after installing the Playwright Chromium
+browser with `npx playwright install chromium`.
+
+| File | Covers |
+|---|---|
+| `test_chunker.py` | Heading trails, size limits, overlap, merge-not-drop |
+| `test_fusion.py` | RRF formula, rank-over-score, single-arm survival |
+| `test_generation.py` | Score parsing, grounding verdicts, failure fallbacks |
+| `test_tools_security.py` | Context isolation, RBAC, no identity in signatures |
+| `test_agent_graph.py` | Routing, loop cap, tool errors, finalize fallbacks |
+
+### Two bugs these tests caught
+
+**Short sections vanished from the index.** Splitting by heading gave each
+section its own chunk, and anything under `min_size` was dropped. Policy
+documents put the rule in short sections — *"Less than 48 hours before the
+event, no refund is issued"* is 56 characters. It was being deleted while the
+surrounding prose stayed, so retrieval returned something plausible and wrong
+with no error anywhere. Undersized chunks now merge into a neighbour.
+
+**`overlap or default` swallowed an explicit `0`.** Passing `overlap=0`
+silently became 200, so chunks exceeded their stated size. Now `is None`.
+
+---
+
+## 8. Troubleshooting
+
+**`type "vector" does not exist`** — pgvector is not installed in the
+database. See prerequisites.
+
+**Embedding vector dimension mismatch** — verify `OPENROUTER_EMBEDDING_DIM=2048`
+matches the `knowledge_chunks_nvidia` columns and configured model before
+re-ingesting.
+
+**Agent invents event IDs** — usually the model, not the prompt. Pin
+`OPENROUTER_MODEL` to a supported tool-calling model. The
+UUID parse error already tells the model to search first.
+
+**Policy answers are "I could not find that"** — check
+`/api/admin/knowledge/status` shows chunks. If it does, the grounding checker
+may be over-rejecting; set `ENABLE_HALLUCINATION_CHECK=false` to confirm
+before tuning.
+
+**Rate limits (429)** — free-tier limits are low and ingest makes one metadata
+call per chunk. Set `ENABLE_METADATA_EXTRACTION=false` for a faster, cheaper
+ingest; retrieval degrades slightly.
+
+**Everything is slow** — one turn can be four LLM calls (intent, reason,
+rerank, grounding) plus a retry. Free models are slow. Set
+`ENABLE_METADATA_EXTRACTION=false` and pin a fast model for a demo.
+
+---
+
+## 9. Layout
+
+```
+app/
+├── agent/
+│   ├── state.py          AgentState (roadmap section 10)
+│   ├── prompts.py        System prompt + intent classification
+│   ├── memory.py         Session and message persistence
+│   ├── nodes.py          classify_intent, load_memory, reason, act, finalize
+│   └── graph.py          StateGraph assembly + run_agent()
+├── tools/
+│   ├── context.py        ToolContext, require_admin  ← security boundary
+│   ├── registry.py       Role-filtered tool lists
+│   ├── formatting.py     Tool output formatting, UUID/date parsing
+│   ├── event_tools.py    5 tools
+│   ├── venue_tools.py    2 tools
+│   ├── registration_tools.py  4 tools
+│   └── rag_tools.py      search_event_policy
+├── rag/
+│   ├── clients.py        OpenRouter chat + embeddings
+│   ├── converter.py      MarkItDown → Markdown
+│   ├── chunker.py        Heading-aware splitting
+│   ├── metadata.py       LLM metadata extraction
+│   ├── ingest.py         Indexing orchestration
+│   ├── search.py         dense_search + sparse_search
+│   ├── fusion.py         Reciprocal Rank Fusion
+│   ├── reranker.py       LLM / cross-encoder reranking
+│   ├── generator.py      Prompt building + grounding check
+│   └── pipeline.py       retrieve() and answer()
+├── observability/logger.py   agent_runs + tool_calls
+├── models/{knowledge,agent}.py
+├── services/availability_service.py
+└── api/chat.py
+```
+
+---
+
+## 10. Roadmap coverage
+
+Done: authentication-aware agent, RBAC, controlled tool calling, agent state,
+multi-step workflows, document ingestion, chunking, embeddings, vector
+storage, semantic search, business-vs-RAG routing, agent activity logging,
+tool-failure handling, unit and agent and RAG tests.
+
+Not mine / not done: notification tools (no notification service exists),
+Docker deployment (week 8).
+
+Known limits worth naming in a review:
+
+- Events accept an optional `end_time`; legacy events and events without one
+  use `EVENT_DEFAULT_DURATION_HOURS` (default 3) for venue availability.
+- Ingest is synchronous. Fine for six documents; move it to a worker beyond that.
+- `ts_rank_cd` is not true BM25 (no length normalisation).
+- Memory is a fixed window of 10 turns — no summarisation of older context.
