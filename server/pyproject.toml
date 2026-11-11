@@ -6,7 +6,7 @@ readme = "AGENT_RAG_README.md"
 authors = [
     { name = "Swati Swagatika Sahoo", email = "swatiswagatikasahoo32@gmail.com" }
 ]
-requires-python = ">=3.11"
+requires-python = "==3.12.*"
 dependencies = [
     "alembic>=1.19.1",
     "bcrypt>=4.0.1,<4.1.0",
