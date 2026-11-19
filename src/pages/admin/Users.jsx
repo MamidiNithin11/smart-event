@@ -134,8 +134,8 @@ export default function AdminUsers() {
         <EmptyState icon={Users} title="No users found" description="There are no registered user accounts." />
       ) : (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
+          <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-secondary)" }}>
                   <th style={{ padding: "0.875rem 1.25rem", fontWeight: 700 }}>User Name</th>
@@ -148,13 +148,13 @@ export default function AdminUsers() {
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                    <td style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                    <td data-label="User Name" style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
                       {u.name}
                     </td>
-                    <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                    <td data-label="Email Address" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                       {u.email}
                     </td>
-                    <td style={{ padding: "1rem 1.25rem" }}>
+                    <td data-label="Role" style={{ padding: "1rem 1.25rem" }}>
                       <Badge
                         variant={
                           u.role === "MAIN_ADMIN"
@@ -167,10 +167,10 @@ export default function AdminUsers() {
                         {u.role}
                       </Badge>
                     </td>
-                    <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                    <td data-label="Created Date" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : "N/A"}
                     </td>
-                    <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
+                    <td data-label="Actions" style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
                         {isMainAdmin && u.role !== "MAIN_ADMIN" && u.id !== currentUser?.id && (
                           <button

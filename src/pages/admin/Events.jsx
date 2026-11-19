@@ -142,8 +142,8 @@ export default function AdminEvents() {
         />
       ) : (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
+          <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-secondary)" }}>
                   <th style={{ padding: "0.875rem 1.25rem", fontWeight: 700 }}>Event Title</th>
@@ -161,22 +161,22 @@ export default function AdminEvents() {
                   const dateObj = ev.event_date ? new Date(ev.event_date) : null;
                   return (
                     <tr key={ev.event_id} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                      <td data-label="Event Title" style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
                         {ev.title}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="Category" style={{ padding: "1rem 1.25rem" }}>
                         <Badge variant="primary">{ev.category}</Badge>
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                      <td data-label="Venue" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                         {venue ? `${venue.name} (${venue.city})` : ev.address || "Venue TBA"}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                      <td data-label="Date" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                         {dateObj ? dateObj.toLocaleDateString() : "TBA"}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="Available Seats" style={{ padding: "1rem 1.25rem" }}>
                         <span style={{ fontWeight: 600 }}>{ev.available_seats}</span> / {ev.capacity}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="Status" style={{ padding: "1rem 1.25rem" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", flexWrap: "wrap" }}>
                           <Badge variant={ev.status === "published" ? "success" : "warning"}>
                             {ev.status || "published"}
@@ -184,7 +184,7 @@ export default function AdminEvents() {
                           {ev.is_completed && <Badge variant="neutral">Completed</Badge>}
                         </div>
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
+                      <td data-label="Actions" style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
                         <div style={{ display: "inline-flex", gap: "0.5rem" }}>
                           <button
                             onClick={() => setEditTarget(ev)}

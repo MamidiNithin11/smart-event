@@ -28,6 +28,7 @@ export default function Modal({
 
   return (
     <div
+      className="app-modal-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -44,6 +45,7 @@ export default function Modal({
       aria-modal="true"
     >
       <div
+        className="app-modal"
         style={{
           width: "100%",
           maxWidth,
@@ -54,7 +56,7 @@ export default function Modal({
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "90vh",
+          maxHeight: "90dvh",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -78,7 +80,7 @@ export default function Modal({
             <X size={18} />
           </button>
         </div>
-        <div style={{ padding: "1.5rem", overflowY: "auto" }}>{children}</div>
+        <div className="app-modal-content" style={{ padding: "1.5rem", overflowY: "auto" }}>{children}</div>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ export default function EventGrid({ events = [], registeredEventIds, actionLabel
 
   return (
     <div
+      className="mobile-grid"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",

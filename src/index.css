@@ -446,4 +446,219 @@ ol {
   .container {
     padding: 0 var(--space-md);
   }
+  .admin-main-content {
+    padding: 1rem 0.75rem 1.5rem !important;
+  }
+  .admin-main-content > * {
+    min-width: 0;
+  }
+
+  .admin-ai-layout {
+    position: relative;
+    min-height: 0;
+    gap: 0 !important;
+    height: calc(100dvh - var(--navbar-height) - 3.5rem) !important;
+  }
+
+  .admin-ai-history {
+    display: none !important;
+  }
+
+  .admin-ai-history.is-open {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 3;
+    display: flex !important;
+    width: min(280px, 88vw) !important;
+    height: 100%;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .admin-ai-history-toggle {
+    display: inline-flex !important;
+    flex-shrink: 0;
+  }
+
+  .admin-ai-heading {
+    gap: 0.5rem !important;
+    align-items: flex-start !important;
+  }
+
+  .admin-ai-heading h1 {
+    font-size: 1.1rem !important;
+  }
+
+  .admin-ai-chat-card {
+    min-height: 0;
+  }
+
+  .admin-ai-chat-form {
+    align-items: center;
+    gap: 0.5rem !important;
+    padding: 0.75rem !important;
+  }
+
+  .admin-ai-chat-form .form-input {
+    min-width: 0;
+    font-size: 16px !important;
+  }
+
+  .admin-ai-send {
+    min-width: 44px;
+    padding: 0 0.75rem !important;
+  }
+
+  .admin-ai-send span {
+    display: none;
+  }
+}
+
+.chat-keyboard-open .ai-chat-quick-prompts {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .form-input,
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .app-modal {
+    max-height: calc(100dvh - 2rem) !important;
+  }
+
+  .app-modal-content {
+    padding: 1rem !important;
+  }
+
+  .payment-modal-panel {
+    top: max(0.5rem, env(safe-area-inset-top)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 1rem) !important;
+    max-height: calc(100dvh - 1rem - env(safe-area-inset-top)) !important;
+    overflow-y: auto !important;
+    border-radius: var(--radius-xl) !important;
+  }
+
+  .mobile-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 1rem !important;
+  }
+
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .mobile-grid > *,
+  .mobile-grid-2 > * {
+    min-width: 0;
+  }
+
+  .mobile-info-grid > .form-group {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+  }
+
+  .mobile-card-table-wrap {
+    overflow: visible !important;
+  }
+
+  .mobile-card-table {
+    display: block;
+    width: 100%;
+    border-collapse: separate !important;
+  }
+
+  .mobile-card-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .mobile-card-table tbody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .mobile-card-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    padding: 0.65rem 0.875rem;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-card-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 0.85fr) minmax(0, 1.5fr);
+    align-items: start;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    max-width: none !important;
+    padding: 0.45rem 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+    text-align: left !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-card-table tbody td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .mobile-card-table tbody td[data-label="Actions"] {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.2rem;
+    padding-top: 0.65rem !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+
+  .mobile-card-table tbody td[data-label="Actions"]::before {
+    content: none;
+  }
+
+  .mobile-card-table tbody td[data-label="Actions"] > div {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .mobile-card-table tbody td[colspan] {
+    display: block;
+  }
+
+  .mobile-card-table tbody td[colspan]::before {
+    content: none;
+  }
+
+  .mobile-card-table tbody td[data-label="Update Status"] select {
+    width: 100% !important;
+    min-height: 40px;
+  }
+
 }

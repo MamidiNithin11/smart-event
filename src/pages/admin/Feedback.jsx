@@ -63,7 +63,7 @@ export default function AdminFeedback() {
       {feedback.length === 0 ? (
         <EmptyState icon={MessageSquare} title="No feedback entries" description="No attendee ratings have been submitted yet." />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
+        <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
           {feedback.map((item) => {
             const fId = item.id || item.feedback_id;
             return (

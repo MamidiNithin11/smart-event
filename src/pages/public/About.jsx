@@ -15,7 +15,7 @@ export default function About() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "3rem" }}>
+        <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "3rem" }}>
           <div className="card">
             <Cpu size={28} style={{ color: "var(--color-primary)", marginBottom: "0.75rem" }} />
             <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem" }}>AI-Driven Insights</h3>

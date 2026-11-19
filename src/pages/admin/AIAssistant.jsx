@@ -37,7 +37,7 @@ export default function AIAssistant() {
   const [activeSessionId, setActiveSessionId] = useState(null);
 
   
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.matchMedia("(min-width: 769px)").matches);
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [deletingSessionId, setDeletingSessionId] = useState(null);
@@ -168,7 +168,7 @@ export default function AIAssistant() {
   };
 
   return (
-    <div style={{ display: "flex", height: "calc(100vh - var(--navbar-height) - 4rem)", gap: "1rem" }}>
+    <div className="admin-ai-layout" style={{ display: "flex", height: "calc(100vh - var(--navbar-height) - 4rem)", gap: "1rem" }}>
       
       <div
         style={{
@@ -182,6 +182,7 @@ export default function AIAssistant() {
           border: "1px solid var(--border-color)",
           overflow: "hidden",
         }}
+        className={`admin-ai-history${sidebarOpen ? " is-open" : ""}`}
       >
         
         <div
@@ -213,7 +214,12 @@ export default function AIAssistant() {
         {sidebarOpen && (
           <div style={{ padding: "0.75rem" }}>
             <button
-              onClick={startNewChat}
+              onClick={() => {
+                startNewChat();
+                if (window.matchMedia("(max-width: 768px)").matches) {
+                  setSidebarOpen(false);
+                }
+              }}
               className="btn btn-primary btn-sm"
               style={{ width: "100%", fontSize: "0.8rem" }}
             >
@@ -251,7 +257,12 @@ export default function AIAssistant() {
                     }}
                   >
                     <button
-                      onClick={() => selectSession(s.session_id)}
+                      onClick={() => {
+                        selectSession(s.session_id);
+                        if (window.matchMedia("(max-width: 768px)").matches) {
+                          setSidebarOpen(false);
+                        }
+                      }}
                       style={{
                         flex: 1,
                         minWidth: 0,
@@ -318,7 +329,7 @@ export default function AIAssistant() {
       
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
         
-        <div style={{ marginBottom: "0.875rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div className="admin-ai-heading" style={{ marginBottom: "0.875rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div
             style={{
               width: "38px",
@@ -334,23 +345,33 @@ export default function AIAssistant() {
           >
             <Bot size={21} />
           </div>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: "var(--font-xl)", fontWeight: 800, lineHeight: 1.2 }}>SmartEvent AI Assistant</h1>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.78rem" }}>
               Query event databases, policies, and system status via AI agent.
             </p>
           </div>
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon admin-ai-history-toggle"
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-label={sidebarOpen ? "Close conversation history" : "Open conversation history"}
+            title="Conversation history"
+          >
+            {sidebarOpen ? <X size={18} /> : <History size={18} />}
+          </button>
         </div>
 
         
         <div
-          className="card"
-          style={{ flex: 1, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden", borderRadius: "var(--radius-xl)" }}
+          className="card admin-ai-chat-card"
+          style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden", borderRadius: "var(--radius-xl)" }}
         >
           
           <div
             style={{
               flex: 1,
+              minHeight: 0,
               overflowY: "auto",
               padding: "1.25rem",
               display: "flex",
@@ -364,7 +385,7 @@ export default function AIAssistant() {
               return (
                 <div
                   key={msg.id}
-                  style={{ display: "flex", gap: "0.75rem", justifyContent: isUser ? "flex-end" : "flex-start" }}
+                  style={{ display: "flex", gap: "0.75rem", minWidth: 0, justifyContent: isUser ? "flex-end" : "flex-start" }}
                 >
                   {!isUser && (
                     <div
@@ -378,7 +399,7 @@ export default function AIAssistant() {
                       {msg.isError ? <AlertCircle size={18} /> : <Bot size={18} />}
                     </div>
                   )}
-                  <div style={{ maxWidth: "78%", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                  <div style={{ maxWidth: "78%", minWidth: 0, display: "flex", flexDirection: "column", gap: "0.2rem" }}>
                     <div
                       style={{
                         padding: "0.8rem 1rem",
@@ -443,6 +464,7 @@ export default function AIAssistant() {
           
           <form
             onSubmit={handleSend}
+            className="admin-ai-chat-form"
             style={{
               padding: "0.875rem 1.1rem",
               borderTop: "1px solid var(--border-color)",
@@ -458,10 +480,10 @@ export default function AIAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
-              style={{ fontSize: "0.9rem" }}
+              style={{ fontSize: "0.9rem", minWidth: 0, flex: 1 }}
             />
-            <button type="submit" disabled={!input.trim() || loading} className="btn btn-primary" style={{ flexShrink: 0 }}>
-              <Send size={17} /> Send
+            <button type="submit" disabled={!input.trim() || loading} className="btn btn-primary admin-ai-send" style={{ flexShrink: 0 }}>
+              <Send size={17} /> <span>Send</span>
             </button>
           </form>
         </div>

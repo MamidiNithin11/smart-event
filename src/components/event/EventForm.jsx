@@ -185,7 +185,7 @@ export default function EventForm({ initialData = null, onSubmit, onCancel, subm
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
         <div className="form-group">
           <label className="form-label" htmlFor="event_date">Start Date & Time *</label>
           <input
@@ -212,7 +212,7 @@ export default function EventForm({ initialData = null, onSubmit, onCancel, subm
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
         <div className="form-group">
           <label className="form-label" htmlFor="registration_deadline">Registration Deadline</label>
           <input

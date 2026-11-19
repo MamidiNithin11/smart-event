@@ -300,6 +300,7 @@ export default function Home() {
           </div>
 
           <div
+            className="mobile-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",

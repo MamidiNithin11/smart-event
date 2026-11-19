@@ -230,6 +230,7 @@ export default function UserDashboard() {
 
       
       <div
+        className="mobile-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",

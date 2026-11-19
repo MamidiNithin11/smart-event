@@ -181,6 +181,52 @@ function CodeBlock({ children, className }) {
   );
 }
 
+function MarkdownTable({ children }) {
+  const tableRef = React.useRef(null);
+
+  React.useLayoutEffect(() => {
+    const table = tableRef.current;
+    if (!table) return;
+
+    const labels = Array.from(table.querySelectorAll("thead th")).map((cell) =>
+      cell.textContent.trim()
+    );
+
+    table.querySelectorAll("tbody tr").forEach((row) => {
+      Array.from(row.cells).forEach((cell, index) => {
+        cell.dataset.label = labels[index] || `Column ${index + 1}`;
+      });
+    });
+  }, [children]);
+
+  return (
+    <div
+      className="mobile-card-table-wrap"
+      style={{
+        margin: "0.75rem 0",
+        overflowX: "auto",
+        borderRadius: "var(--radius-lg)",
+        border: "1px solid var(--border-color)",
+        boxShadow: "var(--shadow-sm)",
+        backgroundColor: "var(--bg-elevated)",
+      }}
+    >
+      <table
+        ref={tableRef}
+        className="mobile-card-table"
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          textAlign: "left",
+          fontSize: "0.85rem",
+        }}
+      >
+        {children}
+      </table>
+    </div>
+  );
+}
+
 
 export default function ChatMessageContent({ text, isUser = false }) {
   const cleanedText = React.useMemo(() => cleanAIMessageContent(text), [text]);
@@ -275,29 +321,7 @@ export default function ChatMessageContent({ text, isUser = false }) {
           ),
 
           
-          table: ({ children }) => (
-            <div
-              style={{
-                margin: "0.75rem 0",
-                overflowX: "auto",
-                borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border-color)",
-                boxShadow: "var(--shadow-sm)",
-                backgroundColor: "var(--bg-elevated)",
-              }}
-            >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  textAlign: "left",
-                  fontSize: "0.85rem",
-                }}
-              >
-                {children}
-              </table>
-            </div>
-          ),
+          table: MarkdownTable,
           thead: ({ children }) => (
             <thead
               style={{

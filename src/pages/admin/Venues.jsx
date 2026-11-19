@@ -129,7 +129,7 @@ export default function AdminVenues() {
       {venues.length === 0 ? (
         <EmptyState icon={MapPin} title="No venues registered" description="Add your first venue to start scheduling events." />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
+        <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
           {venues.map((v) => (
             <div key={v.venue_id} className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>

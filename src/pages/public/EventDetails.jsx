@@ -221,7 +221,7 @@ export default function EventDetails() {
           <ArrowLeft size={16} /> Back to Events
         </Link>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "2.5rem" }} className="event-details-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "2.5rem" }} className="event-details-grid mobile-grid">
           
           <div>
             <div style={{ position: "relative", borderRadius: "var(--radius-2xl)", overflow: "hidden", height: "350px", marginBottom: "2rem" }}>

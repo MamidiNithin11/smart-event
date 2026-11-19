@@ -119,7 +119,7 @@ export default function CompletedEvents() {
             description="Completed published events will appear here."
           />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
+          <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
             {events.map((event) => {
               const feedback = feedbackByEvent[event.event_id] || [];
               const averageRating = feedback.length

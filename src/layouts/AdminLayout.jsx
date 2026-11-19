@@ -18,7 +18,7 @@ export default function AdminLayout() {
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <AdminNavbar onOpenMobile={() => setMobileOpen(true)} />
-        <main style={{ flex: 1, padding: "1.5rem 2rem 3rem", overflowY: "auto" }}>
+        <main className="admin-main-content" style={{ flex: 1, minWidth: 0, padding: "1.5rem 2rem 3rem", overflowY: "auto" }}>
           <Outlet />
         </main>
       </div>

@@ -143,7 +143,7 @@ function RunDetailModal({ runId, onClose }) {
           ) : detail ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem" }}>
+              <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem" }}>
                 {[
                   { label: "Status", value: <StatusBadge status={detail.status} /> },
                   { label: "User", value: detail.user_email || "Guest User" },
@@ -368,7 +368,7 @@ export default function AgentActivity() {
         </div>
 
         
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: "1rem" }}>
+        <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: "1rem" }}>
           {[
             { label: "Total Runs", value: activities.length, color: "var(--color-primary)" },
             { label: "Successful", value: activities.filter((a) => (a.status || "").toLowerCase() === "success").length, color: "#16a34a" },
@@ -405,8 +405,8 @@ export default function AgentActivity() {
           />
         ) : (
           <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
+            <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+              <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
                 <thead>
                   <tr
                     style={{
@@ -415,7 +415,7 @@ export default function AgentActivity() {
                       color: "var(--text-secondary)",
                     }}
                   >
-                    {["Run ID", "User", "Query", "Intent", "Status", "Duration", "Timestamp", ""].map((h) => (
+                    {["Run ID", "User", "Query", "Intent", "Status", "Duration", "Timestamp", "Actions"].map((h) => (
                       <th key={h} style={{ padding: "0.875rem 1rem", fontWeight: 700, whiteSpace: "nowrap" }}>
                         {h}
                       </th>
@@ -435,10 +435,10 @@ export default function AgentActivity() {
                       onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                       onClick={() => setSelectedRunId(act.run_id)}
                     >
-                      <td style={{ padding: "0.875rem 1rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      <td data-label="Run ID" style={{ padding: "0.875rem 1rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                         {String(act.run_id || "").slice(0, 8)}...
                       </td>
-                      <td style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap" }}>
+                      <td data-label="User" style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                           <User size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
                           <span style={{ color: "var(--text-primary)", fontSize: "0.835rem", fontWeight: 500 }}>
@@ -447,6 +447,7 @@ export default function AgentActivity() {
                         </div>
                       </td>
                       <td
+                        data-label="Query"
                         style={{
                           padding: "0.875rem 1rem",
                           color: "var(--text-primary)",
@@ -459,21 +460,21 @@ export default function AgentActivity() {
                       >
                         {act.user_request}
                       </td>
-                      <td style={{ padding: "0.875rem 1rem", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+                      <td data-label="Intent" style={{ padding: "0.875rem 1rem", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
                         {act.detected_intent || "—"}
                       </td>
-                      <td style={{ padding: "0.875rem 1rem" }}>
+                      <td data-label="Status" style={{ padding: "0.875rem 1rem" }}>
                         <StatusBadge status={act.status} />
                       </td>
-                      <td style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+                      <td data-label="Duration" style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                           <Clock size={12} /> {formatDuration(act.latency_ms)}
                         </span>
                       </td>
-                      <td style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap", color: "var(--text-muted)", fontSize: "0.78rem" }}>
+                      <td data-label="Timestamp" style={{ padding: "0.875rem 1rem", whiteSpace: "nowrap", color: "var(--text-muted)", fontSize: "0.78rem" }}>
                         {formatDate(act.created_at)}
                       </td>
-                      <td style={{ padding: "0.875rem 1rem" }}>
+                      <td data-label="Actions" style={{ padding: "0.875rem 1rem" }}>
                         <button
                           className="btn btn-ghost btn-icon"
                           onClick={(e) => { e.stopPropagation(); setSelectedRunId(act.run_id); }}

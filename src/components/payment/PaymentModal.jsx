@@ -75,6 +75,7 @@ export default function PaymentModal({ event, user, onSuccess, onClose }) {
 
       
       <div
+        className="payment-modal-panel"
         style={{
           position: "fixed",
           top: "50%",
@@ -219,7 +220,7 @@ export default function PaymentModal({ event, user, onSuccess, onClose }) {
                 <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>
                   Select Payment Method
                 </label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.6rem" }}>
+                <div className="mobile-grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.6rem" }}>
                   {[
                     { id: "upi", label: "UPI / QR", icon: QrCode },
                     { id: "card", label: "Card", icon: CreditCard },
@@ -286,7 +287,7 @@ export default function PaymentModal({ event, user, onSuccess, onClose }) {
                       required
                     />
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <div className="mobile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
                     <div>
                       <label className="form-label" style={{ fontSize: "0.8rem" }}>Expiry (MM/YY)</label>
                       <input

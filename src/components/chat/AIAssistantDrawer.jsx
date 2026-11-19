@@ -54,6 +54,42 @@ export default function AIAssistantDrawer() {
     }
   }, [messages, loading, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const visualViewport = window.visualViewport;
+    const updateViewport = () => {
+      const height = visualViewport?.height ?? window.innerHeight;
+      const offset = visualViewport?.offsetTop ?? 0;
+      document.documentElement.style.setProperty(
+        "--chat-visual-viewport-height",
+        `${height}px`
+      );
+      document.documentElement.style.setProperty(
+        "--chat-visual-viewport-offset",
+        `${offset}px`
+      );
+      document.documentElement.classList.toggle(
+        "chat-keyboard-open",
+        window.innerWidth <= 768 && window.innerHeight - height > 120
+      );
+    };
+
+    updateViewport();
+    visualViewport?.addEventListener("resize", updateViewport);
+    visualViewport?.addEventListener("scroll", updateViewport);
+    window.addEventListener("resize", updateViewport);
+
+    return () => {
+      visualViewport?.removeEventListener("resize", updateViewport);
+      visualViewport?.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+      document.documentElement.classList.remove("chat-keyboard-open");
+      document.documentElement.style.removeProperty("--chat-visual-viewport-height");
+      document.documentElement.style.removeProperty("--chat-visual-viewport-offset");
+    };
+  }, [isOpen]);
+
   if (!isOpen || !isAuthenticated) return null;
 
   const handleFormSubmit = (e) => {
@@ -76,6 +112,7 @@ export default function AIAssistantDrawer() {
       
       <div
         onClick={closeAIChat}
+        className="ai-chat-backdrop"
         style={{
           position: "fixed",
           inset: 0,
@@ -88,6 +125,7 @@ export default function AIAssistantDrawer() {
 
       
       <div
+        className="ai-chat-drawer"
         style={{
           position: "fixed",
           top: 0,
@@ -107,6 +145,7 @@ export default function AIAssistantDrawer() {
       >
         
         <div
+          className="ai-chat-header"
           style={{
             padding: "1rem 1.25rem",
             borderBottom: "1px solid var(--border-color)",
@@ -116,7 +155,7 @@ export default function AIAssistantDrawer() {
             backgroundColor: "var(--bg-elevated)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div className="ai-chat-brand" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
                 width: "38px",
@@ -155,10 +194,10 @@ export default function AIAssistantDrawer() {
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div className="ai-chat-header-actions" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
               onClick={() => setIsExpanded((expanded) => !expanded)}
-              className="btn btn-ghost btn-icon"
+              className="btn btn-ghost btn-icon ai-chat-expand"
               title={isExpanded ? "Collapse assistant" : "Expand assistant"}
               aria-label={isExpanded ? "Collapse assistant" : "Expand assistant"}
             >
@@ -168,14 +207,15 @@ export default function AIAssistantDrawer() {
               onClick={() => setShowHistory((prev) => !prev)}
               className="btn btn-ghost btn-icon"
               title="Chat History"
+              aria-label={showHistory ? "Hide chat history" : "Show chat history"}
               style={{ color: showHistory ? "var(--color-primary)" : "var(--text-secondary)" }}
             >
               <History size={18} />
             </button>
-            <button onClick={startNewChat} className="btn btn-ghost btn-icon" title="New Chat Session">
+            <button onClick={startNewChat} className="btn btn-ghost btn-icon" title="New Chat Session" aria-label="New chat session">
               <Plus size={18} />
             </button>
-            <button onClick={closeAIChat} className="btn btn-ghost btn-icon" title="Close Drawer">
+            <button onClick={closeAIChat} className="btn btn-ghost btn-icon" title="Close Drawer" aria-label="Close AI Assistant">
               <X size={20} />
             </button>
           </div>
@@ -300,6 +340,7 @@ export default function AIAssistantDrawer() {
         <div
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: "auto",
             padding: "1.25rem",
             display: "flex",
@@ -430,6 +471,7 @@ export default function AIAssistantDrawer() {
 
         
         <div
+          className="ai-chat-quick-prompts"
           style={{
             padding: "0.5rem 1rem",
             backgroundColor: "var(--bg-elevated)",
@@ -465,6 +507,7 @@ export default function AIAssistantDrawer() {
         
         <form
           onSubmit={handleFormSubmit}
+          className="ai-chat-form"
           style={{
             padding: "1rem 1.25rem",
             backgroundColor: "var(--bg-elevated)",
@@ -480,12 +523,12 @@ export default function AIAssistantDrawer() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
-            style={{ fontSize: "0.9rem" }}
+            style={{ fontSize: "1rem", minWidth: 0, flex: 1 }}
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="btn btn-primary"
+            className="btn btn-primary ai-chat-send"
             style={{ padding: "0 1rem", flexShrink: 0 }}
           >
             <Send size={18} />
@@ -494,6 +537,51 @@ export default function AIAssistantDrawer() {
       </div>
 
       <style>{`
+        @media (max-width: 768px) {
+          .ai-chat-header {
+            padding: 0.75rem 0.875rem !important;
+          }
+          .ai-chat-brand {
+            min-width: 0;
+          }
+          .ai-chat-brand > div:last-child {
+            min-width: 0;
+          }
+          .ai-chat-brand p {
+            display: none;
+          }
+          .ai-chat-header-actions {
+            gap: 0.125rem !important;
+          }
+          .ai-chat-expand {
+            display: none !important;
+          }
+          .ai-chat-backdrop {
+            inset: auto 0 auto !important;
+            top: var(--chat-visual-viewport-offset, 0px) !important;
+            height: var(--chat-visual-viewport-height, 100dvh) !important;
+          }
+          .ai-chat-drawer {
+            inset: auto 0 auto !important;
+            top: var(--chat-visual-viewport-offset, 0px) !important;
+            width: 100vw !important;
+            height: var(--chat-visual-viewport-height, 100dvh) !important;
+            max-height: 100dvh;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-left: 0 !important;
+          }
+          .ai-chat-form {
+            padding: 0.75rem 0.875rem !important;
+            gap: 0.5rem !important;
+          }
+          .ai-chat-form .form-input {
+            font-size: 16px !important;
+          }
+          .ai-chat-send {
+            min-width: 44px;
+            padding: 0 0.75rem !important;
+          }
+        }
         @keyframes slideLeft {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }

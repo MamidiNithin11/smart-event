@@ -63,7 +63,7 @@ export default function Profile() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <h3 style={{ fontSize: "1.05rem", fontWeight: 700 }}>Account Information</h3>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+          <div className="mobile-grid mobile-info-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
             <div className="form-group">
               <label className="form-label">Full Name</label>
               <div className="form-input" style={{ backgroundColor: "var(--bg-tertiary)" }}>
@@ -79,7 +79,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+          <div className="mobile-grid mobile-info-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
             <div className="form-group">
               <label className="form-label">Account Role</label>
               <div className="form-input" style={{ backgroundColor: "var(--bg-tertiary)", textTransform: "capitalize" }}>

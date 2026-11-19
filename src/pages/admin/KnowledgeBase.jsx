@@ -286,6 +286,7 @@ export default function KnowledgeBase() {
       </div>
 
       <div
+        className="mobile-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
@@ -476,8 +477,8 @@ export default function KnowledgeBase() {
             description="Upload a policy or FAQ document to populate the RAG knowledge base."
           />
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+          <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
               <thead>
                 <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border-color)" }}>
                   <th style={{ padding: "0.65rem 0.5rem", color: "var(--text-muted)", fontWeight: 600 }}>
@@ -500,19 +501,19 @@ export default function KnowledgeBase() {
                     key={doc.filename}
                     style={{ borderBottom: "1px solid var(--border-color)" }}
                   >
-                    <td style={{ padding: "0.75rem 0.5rem", fontWeight: 600 }}>
+                    <td data-label="Filename" style={{ padding: "0.75rem 0.5rem", fontWeight: 600 }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem" }}>
                         <FileText size={15} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
                         {doc.filename}
                       </span>
                     </td>
-                    <td style={{ padding: "0.75rem 0.5rem", color: "var(--text-secondary)" }}>
+                    <td data-label="Type" style={{ padding: "0.75rem 0.5rem", color: "var(--text-secondary)" }}>
                       {doc.doc_type || "—"}
                     </td>
-                    <td style={{ padding: "0.75rem 0.5rem", color: "var(--text-secondary)" }}>
+                    <td data-label="Chunks" style={{ padding: "0.75rem 0.5rem", color: "var(--text-secondary)" }}>
                       {doc.chunks ?? 0}
                     </td>
-                    <td style={{ padding: "0.75rem 0.5rem" }}>
+                    <td data-label="Actions" style={{ padding: "0.75rem 0.5rem" }}>
                       <button
                         type="button"
                         className="btn btn-ghost btn-icon"

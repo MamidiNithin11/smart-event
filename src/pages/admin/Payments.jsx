@@ -85,8 +85,8 @@ export default function AdminPayments() {
         <EmptyState icon={CreditCard} title="No payments recorded" description="No payment transactions found in system audit logs." />
       ) : (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
+          <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-secondary)" }}>
                   <th style={{ padding: "0.875rem 1.25rem", fontWeight: 700 }}>Transaction ID</th>
@@ -102,24 +102,24 @@ export default function AdminPayments() {
                   const pId = p.id || p.payment_id;
                   return (
                     <tr key={pId} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                      <td style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem" }}>
+                      <td data-label="Transaction ID" style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem" }}>
                         {pId}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      <td data-label="Registration ID" style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                         {p.registration_id}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                      <td data-label="Amount" style={{ padding: "1rem 1.25rem", fontWeight: 700, color: "var(--text-primary)" }}>
                         {formatAmount.format(Number(p.amount ?? 0))}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="Status" style={{ padding: "1rem 1.25rem" }}>
                         <Badge variant={p.status === "COMPLETED" ? "success" : p.status === "PENDING" ? "warning" : "danger"}>
                           {p.status || "COMPLETED"}
                         </Badge>
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                      <td data-label="Created Date" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                         {p.created_at ? new Date(p.created_at).toLocaleString() : "Recently"}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
+                      <td data-label="Update Status" style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
                         <select
                           className="form-select"
                           style={{ width: "auto", display: "inline-block", padding: "0.25rem 0.5rem", fontSize: "0.8rem" }}

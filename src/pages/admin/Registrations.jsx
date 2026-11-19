@@ -121,8 +121,8 @@ export default function AdminRegistrations() {
         />
       ) : (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
+          <div className="mobile-card-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="mobile-card-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.875rem" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-secondary)" }}>
                   <th style={{ padding: "0.875rem 1.25rem", fontWeight: 700 }}>Registration ID</th>
@@ -142,27 +142,27 @@ export default function AdminRegistrations() {
 
                   return (
                     <tr key={regId} style={{ borderBottom: "1px solid var(--border-color)", opacity: isCancelled ? 0.65 : 1 }}>
-                      <td style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      <td data-label="Registration ID" style={{ padding: "1rem 1.25rem", fontFamily: "monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                         {regId?.slice(0, 13)}...
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="User / Email" style={{ padding: "1rem 1.25rem" }}>
                         <div style={{ display: "flex", flexDirection: "column" }}>
                           <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{user ? user.name : "Unknown User"}</span>
                           <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{user ? user.email : reg.user_id}</span>
                         </div>
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                      <td data-label="Event Title" style={{ padding: "1rem 1.25rem", fontWeight: 600, color: "var(--text-primary)" }}>
                         {event ? event.title : reg.event_id}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
+                      <td data-label="Registration Date" style={{ padding: "1rem 1.25rem", color: "var(--text-secondary)" }}>
                         {reg.registered_at ? new Date(reg.registered_at).toLocaleString() : "Recently"}
                       </td>
-                      <td style={{ padding: "1rem 1.25rem" }}>
+                      <td data-label="Status" style={{ padding: "1rem 1.25rem" }}>
                         <Badge variant={isCancelled ? "danger" : "success"}>
                           {reg.status || "CONFIRMED"}
                         </Badge>
                       </td>
-                      <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
+                      <td data-label="Actions" style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
                         {!isCancelled && (
                           <button
                             onClick={() => setCancelTarget(reg)}
