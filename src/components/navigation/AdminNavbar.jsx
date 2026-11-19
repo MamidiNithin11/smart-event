@@ -38,15 +38,24 @@ export default function AdminNavbar({ onOpenMobile }) {
         >
           <Menu size={20} />
         </button>
-        <span style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-secondary)" }}>
+        <span className="admin-workspace-title" style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-secondary)" }}>
           Administrator Workspace
         </span>
+        <button
+          onClick={toggleAIChat}
+          className="btn btn-ghost btn-icon admin-ai-mobile"
+          aria-label="Toggle AI Assistant"
+          title="AI Assistant"
+          style={{ display: "none" }}
+        >
+          <Sparkles size={20} />
+        </button>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <button
           onClick={toggleAIChat}
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary btn-sm admin-ai-desktop"
           style={{
             background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.15))",
             borderColor: "rgba(99, 102, 241, 0.3)",
@@ -62,13 +71,14 @@ export default function AdminNavbar({ onOpenMobile }) {
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-ghost btn-sm"
+          id="admin-live-site"
           style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
         >
           <span>Live Site</span>
           <ExternalLink size={14} />
         </Link>
 
-        <div style={{ height: "24px", width: "1px", backgroundColor: "var(--border-color)" }} />
+        <div className="admin-navbar-divider" style={{ height: "24px", width: "1px", backgroundColor: "var(--border-color)" }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
           <div
@@ -87,7 +97,7 @@ export default function AdminNavbar({ onOpenMobile }) {
           >
             {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="admin-navbar-user-info" style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: "0.85rem", fontWeight: 600, lineHeight: 1.2 }}>{user?.name || "Admin"}</span>
             <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{user?.email}</span>
           </div>
@@ -101,6 +111,12 @@ export default function AdminNavbar({ onOpenMobile }) {
       <style>{`
         @media (max-width: 768px) {
           .admin-mobile-toggle { display: flex !important; }
+          .admin-ai-mobile { display: flex !important; }
+          .admin-ai-desktop,
+          #admin-live-site,
+          .admin-navbar-divider,
+          .admin-navbar-user-info,
+          .admin-workspace-title { display: none !important; }
         }
       `}</style>
     </header>

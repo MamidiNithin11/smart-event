@@ -152,13 +152,23 @@ export default function UserNavbar() {
         </div>
 
         
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="btn btn-ghost btn-icon user-mobile-toggle"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="mobile-user-nav-actions" style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+          <button
+            onClick={toggleAIChat}
+            className="btn btn-ghost btn-icon"
+            aria-label="Toggle AI Assistant"
+            title="AI Assistant"
+          >
+            <Sparkles size={20} />
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="btn btn-ghost btn-icon user-mobile-toggle"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       
@@ -201,7 +211,7 @@ export default function UserNavbar() {
       <style>{`
         @media (min-width: 768px) {
           .desktop-user-nav { display: flex !important; }
-          .user-mobile-toggle { display: none !important; }
+          .mobile-user-nav-actions { display: none !important; }
         }
       `}</style>
     </header>

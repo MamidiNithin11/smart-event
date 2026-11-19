@@ -147,13 +147,25 @@ export default function PublicNavbar() {
         </div>
 
         
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="btn btn-ghost btn-icon mobile-toggle"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="mobile-nav-actions" style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+          {isAuthenticated && (
+            <button
+              onClick={toggleAIChat}
+              className="btn btn-ghost btn-icon"
+              aria-label="Toggle AI Assistant"
+              title="AI Assistant"
+            >
+              <Sparkles size={20} />
+            </button>
+          )}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="btn btn-ghost btn-icon mobile-toggle"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       
@@ -216,7 +228,7 @@ export default function PublicNavbar() {
       <style>{`
         @media (min-width: 768px) {
           .desktop-nav { display: flex !important; }
-          .mobile-toggle { display: none !important; }
+          .mobile-nav-actions { display: none !important; }
         }
       `}</style>
     </header>
