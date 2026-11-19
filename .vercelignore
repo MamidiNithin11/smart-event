@@ -27,7 +27,6 @@ dist-info/
 
 # Node.js cache and optional lockfiles
 node_modules/.cache/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
