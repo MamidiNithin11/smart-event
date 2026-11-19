@@ -1,4 +1,8 @@
 [project]
 name = "smart-event"
 version = "0.1.0"
-requires-python = "==3.12.*"
+requires-python = ">=3.12,<3.13"
+
+[tool.uv]
+# Vercel uses Python 3.12 for serverless functions
+package = false

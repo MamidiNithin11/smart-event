@@ -1,0 +1,54 @@
+# Large files that don't need to be deployed
+*.log
+
+# Python cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.py[cod]
+*.egg-info/
+dist-info/
+.eggs/
+
+# Development files
+.git/
+.gitignore
+*.orig
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.code-workspace
+
+# Node.js cache and optional lockfiles
+node_modules/.cache/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test files
+coverage/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+tests/
+__tests__/
+pytest_cache/
+.pytest_cache/
+
+# Documentation source files - exclude from build artifacts to save bandwidth
+README.md
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Optional debug files
+*.debug
+debug.log

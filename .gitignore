@@ -7,19 +7,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+.venv
+
+# Build outputs
 dist
 dist-ssr
 .vercel
-.venv
+
+# Python cache
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyc
 *.local
+
+# Environment variables (keep .env.example for reference)
 .env
 .env.*
 !.env.example
 
-# Editor directories and files
+# IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -29,3 +38,9 @@ __pycache__/
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel
+
+# Test coverage
+coverage/
